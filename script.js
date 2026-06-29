@@ -279,9 +279,14 @@ function render() {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('todoTitle').addEventListener('keydown', e => {
     if (e.key === 'Enter') addTodo();
+    if (e.key === 'Escape') collapseForm();
+  });
+  document.getElementById('todoDesc').addEventListener('keydown', e => {
+    if (e.key === 'Escape') collapseForm();
   });
   document.getElementById('newGroupName').addEventListener('keydown', e => {
     if (e.key === 'Enter') addGroup();
+    if (e.key === 'Escape') toggleGroupInput();
   });
   renderGroups();
   render();
