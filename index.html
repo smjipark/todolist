@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- 상단 제목 프레임 -->
+  <!-- 상단 헤더 -->
   <header class="top-header">
     <div class="header-inner">
       <div class="header-title">
@@ -16,24 +16,24 @@
         <div>
           <div class="title-row">
             <h1>TODO List</h1>
-            <span class="version-badge">v1.0.0</span>
+            <span class="version-badge">v1.1.0</span>
           </div>
           <p class="subtitle">오늘 할일을 정리해보세요.</p>
         </div>
       </div>
 
       <nav class="header-nav">
-        <button class="nav-item active" onclick="setFilter('all', this)">
+        <button class="nav-item active" onclick="setStatusFilter('all', this)">
           <span class="nav-icon">📋</span>
           <span>전체</span>
           <span class="nav-badge" id="badge-all">0</span>
         </button>
-        <button class="nav-item" onclick="setFilter('active', this)">
+        <button class="nav-item" onclick="setStatusFilter('active', this)">
           <span class="nav-icon">🔄</span>
           <span>진행 중</span>
           <span class="nav-badge" id="badge-active">0</span>
         </button>
-        <button class="nav-item" onclick="setFilter('done', this)">
+        <button class="nav-item" onclick="setStatusFilter('done', this)">
           <span class="nav-icon">✔️</span>
           <span>완료</span>
           <span class="nav-badge" id="badge-done">0</span>
@@ -42,33 +42,70 @@
     </div>
   </header>
 
-  <!-- 하단 콘텐츠 프레임 -->
-  <main class="content">
-    <div class="content-inner">
+  <!-- 메인 레이아웃 (그룹 사이드바 + 콘텐츠) -->
+  <div class="main-layout">
 
-      <div class="input-area">
-        <input type="text" id="todoInput" placeholder="할 일을 입력하세요..." />
-        <button onclick="addTodo()">추가</button>
+    <!-- 그룹 사이드바 -->
+    <aside class="group-sidebar">
+      <div class="group-sidebar-header">
+        <span class="group-sidebar-title">그룹</span>
+        <button class="group-add-btn" onclick="toggleGroupInput()" title="그룹 추가">+</button>
       </div>
 
-      <div class="list-section">
-        <div class="list-section-header">
-          <div class="list-section-left">
-            <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="전체 선택" />
-            <span class="list-section-title" id="contentTitle">전체 할일</span>
+      <div class="group-input-area" id="groupInputArea" style="display:none;">
+        <input type="text" id="newGroupName" placeholder="그룹 이름..." />
+        <div class="group-input-actions">
+          <button class="group-confirm-btn" onclick="addGroup()">저장</button>
+          <button class="group-cancel-btn" onclick="toggleGroupInput()">취소</button>
+        </div>
+      </div>
+
+      <div class="group-list" id="groupList"></div>
+    </aside>
+
+    <!-- 콘텐츠 -->
+    <main class="content">
+      <div class="content-inner">
+
+        <!-- 입력 카드 (인라인 확장) -->
+        <div class="input-card">
+          <div class="input-row">
+            <input type="text" id="todoTitle" placeholder="할 일을 입력하세요..."
+              onfocus="expandForm()" />
+            <button class="add-btn" onclick="addTodo()">추가</button>
           </div>
-          <div class="list-section-right">
-            <span class="summary" id="summary"></span>
-            <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="deleteSelected()" style="display:none;">
-              선택 삭제 <span id="selectedCount"></span>
-            </button>
+          <div class="input-expand" id="inputExpand" style="display:none;">
+            <textarea id="todoDesc" placeholder="설명을 입력하세요. (선택)" rows="2"></textarea>
+            <div class="input-bottom-row">
+              <select id="todoGroup">
+                <option value="">📁 그룹 없음</option>
+              </select>
+              <button class="cancel-btn" onclick="collapseForm()">취소</button>
+            </div>
           </div>
         </div>
-        <div class="todo-list" id="todoList"></div>
-      </div>
 
-    </div>
-  </main>
+        <!-- 할 일 목록 -->
+        <div class="list-section">
+          <div class="list-section-header">
+            <div class="list-section-left">
+              <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="전체 선택" />
+              <span class="list-section-title" id="contentTitle">전체 할 일</span>
+            </div>
+            <div class="list-section-right">
+              <span class="summary" id="summary"></span>
+              <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="deleteSelected()" style="display:none;">
+                선택 삭제 <span id="selectedCount"></span>
+              </button>
+            </div>
+          </div>
+          <div class="todo-list" id="todoList"></div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
 
   <script src="script.js"></script>
 </body>
