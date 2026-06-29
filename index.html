@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TODO List</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 상단 제목 프레임 -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="header-title">
+        <span class="logo-icon">✅</span>
+        <div>
+          <div class="title-row">
+            <h1>TODO List</h1>
+            <span class="version-badge">v1.0.0</span>
+          </div>
+          <p class="subtitle">오늘 할일을 정리해보세요.</p>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <button class="nav-item active" onclick="setFilter('all', this)">
+          <span class="nav-icon">📋</span>
+          <span>전체</span>
+          <span class="nav-badge" id="badge-all">0</span>
+        </button>
+        <button class="nav-item" onclick="setFilter('active', this)">
+          <span class="nav-icon">🔄</span>
+          <span>진행 중</span>
+          <span class="nav-badge" id="badge-active">0</span>
+        </button>
+        <button class="nav-item" onclick="setFilter('done', this)">
+          <span class="nav-icon">✔️</span>
+          <span>완료</span>
+          <span class="nav-badge" id="badge-done">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 하단 콘텐츠 프레임 -->
+  <main class="content">
+    <div class="content-inner">
+
+      <div class="input-area">
+        <input type="text" id="todoInput" placeholder="할 일을 입력하세요..." />
+        <button onclick="addTodo()">추가</button>
+      </div>
+
+      <div class="list-section">
+        <div class="list-section-header">
+          <div class="list-section-left">
+            <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="전체 선택" />
+            <span class="list-section-title" id="contentTitle">전체 할일</span>
+          </div>
+          <div class="list-section-right">
+            <span class="summary" id="summary"></span>
+            <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="deleteSelected()" style="display:none;">
+              선택 삭제 <span id="selectedCount"></span>
+            </button>
+          </div>
+        </div>
+        <div class="todo-list" id="todoList"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

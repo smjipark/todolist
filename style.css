@@ -1,0 +1,328 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 상단 제목 프레임 ── */
+.top-header {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  font-size: 2rem;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-title h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.version-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6366f1;
+  background: white;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  align-self: center;
+  margin-top: 2px;
+}
+
+.subtitle {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
+}
+
+/* ── 상단 네비게이션 ── */
+.header-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-item:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.nav-item.active {
+  background: white;
+  border-color: white;
+  color: #6366f1;
+  font-weight: 700;
+}
+
+.nav-icon {
+  font-size: 0.95rem;
+}
+
+.nav-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.nav-item.active .nav-badge {
+  background: #ede9fe;
+  color: #6366f1;
+}
+
+/* ── 하단 콘텐츠 프레임 ── */
+.content {
+  flex: 1;
+  padding: 32px 16px;
+}
+
+.content-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ── 입력 영역 ── */
+.input-area {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  background: white;
+}
+
+.input-area input:focus {
+  border-color: #6366f1;
+}
+
+.input-area button {
+  padding: 12px 24px;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.input-area button:hover {
+  background: #4f46e5;
+}
+
+/* ── 목록 섹션 ── */
+.list-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.list-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.list-section-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.list-section-left input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+.list-section-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.summary {
+  font-size: 0.82rem;
+  color: #9ca3af;
+}
+
+.delete-selected-btn {
+  padding: 6px 14px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.delete-selected-btn:hover {
+  background: #dc2626;
+}
+
+/* ── 할 일 목록 ── */
+.todo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-item.done {
+  opacity: 0.5;
+}
+
+.todo-item.dimmed {
+  opacity: 0.25;
+}
+
+.todo-item.selected {
+  background: #f0f9ff;
+  opacity: 1;
+}
+
+.todo-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #6366f1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.select-checkbox {
+  accent-color: #ef4444 !important;
+}
+
+.todo-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.todo-item .todo-text {
+  font-size: 0.97rem;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+.completed-at {
+  font-size: 0.75rem;
+  color: #a78bfa;
+}
+
+.todo-item .status-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.todo-item:not(.done) .status-tag {
+  background: #ede9fe;
+  color: #6366f1;
+}
+
+.todo-item.done .status-tag {
+  background: #f0fdf4;
+  color: #22c55e;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #9ca3af;
+  padding: 48px 0;
+  font-size: 0.95rem;
+}
