@@ -15,13 +15,23 @@ const GROUP_COLORS = [
   { bg: '#fdf4ff', text: '#7e22ce' },
 ];
 
-const STATUS_LABELS = {
-  all: '전체 할 일',
-  active: '진행 중인 할 일',
-  done: '완료된 할 일',
-};
+// ── 모달 ──────────────────────────────────────
 
-// ── 그룹 관리 ──────────────────────────────
+function openAddModal() {
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('todoTitle').focus(), 350);
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('todoTitle').value = '';
+  document.getElementById('todoDesc').value = '';
+  document.getElementById('todoGroup').value = '';
+}
+
+// ── 그룹 관리 ────────────────────────────────
 
 function toggleGroupInput() {
   const area = document.getElementById('groupInputArea');
@@ -44,7 +54,7 @@ function addGroup() {
   input.value = '';
   document.getElementById('groupInputArea').style.display = 'none';
 
-  renderGroups();
+  renderGroupChips();
   renderGroupSelect();
 }
 
@@ -52,54 +62,48 @@ function deleteGroup(id) {
   groups = groups.filter(g => g.id !== id);
   todos.forEach(t => { if (t.groupId === id) t.groupId = null; });
   if (currentGroupFilter === id) currentGroupFilter = null;
-  renderGroups();
+  renderGroupChips();
   renderGroupSelect();
   render();
 }
 
 function setGroupFilter(id) {
   currentGroupFilter = (currentGroupFilter === id) ? null : id;
-  renderGroups();
+  renderGroupChips();
   render();
 }
 
 function clearGroupFilter() {
   currentGroupFilter = null;
-  renderGroups();
+  renderGroupChips();
   render();
 }
 
-function renderGroups() {
-  const list = document.getElementById('groupList');
+function renderGroupChips() {
+  const chips = document.getElementById('groupChips');
+  let html = '';
 
-  if (groups.length === 0) {
-    list.innerHTML = '<p class="group-empty-msg">그룹이 없습니다.<br/>+ 버튼으로 추가하세요.</p>';
-    return;
+  if (groups.length > 0) {
+    const allActive = currentGroupFilter === null;
+    html += `<button class="chip ${allActive ? 'chip-active' : ''}" onclick="clearGroupFilter()">전체</button>`;
+
+    html += groups.map(g => {
+      const isActive = currentGroupFilter === g.id;
+      const inlineStyle = isActive
+        ? `background:${g.color.bg};color:${g.color.text};border-color:${g.color.text}`
+        : '';
+      return `
+        <button class="chip" style="${inlineStyle}" onclick="setGroupFilter(${g.id})">
+          <span class="chip-dot" style="background:${g.color.text}"></span>
+          ${escapeHtml(g.name)}
+          <button class="chip-delete" onclick="event.stopPropagation();deleteGroup(${g.id})">×</button>
+        </button>
+      `;
+    }).join('');
   }
 
-  const allActive = currentGroupFilter === null;
-  const allBtn = `
-    <button class="group-item ${allActive ? 'active' : ''}" onclick="clearGroupFilter()">
-      <span class="group-dot" style="background:#9ca3af"></span>
-      <span class="group-item-name">전체 그룹</span>
-      <span class="group-item-count">${todos.length}</span>
-    </button>
-  `;
-
-  const groupBtns = groups.map(g => {
-    const count = todos.filter(t => t.groupId === g.id).length;
-    const isActive = currentGroupFilter === g.id;
-    return `
-      <button class="group-item ${isActive ? 'active' : ''}" onclick="setGroupFilter(${g.id})">
-        <span class="group-dot" style="background:${g.color.text}"></span>
-        <span class="group-item-name">${escapeHtml(g.name)}</span>
-        <span class="group-item-count">${count}</span>
-        <button class="group-delete-btn" onclick="event.stopPropagation(); deleteGroup(${g.id})" title="그룹 삭제">✕</button>
-      </button>
-    `;
-  }).join('');
-
-  list.innerHTML = allBtn + groupBtns;
+  html += `<button class="chip chip-add" onclick="toggleGroupInput()">＋</button>`;
+  chips.innerHTML = html;
 }
 
 function renderGroupSelect() {
@@ -110,18 +114,7 @@ function renderGroupSelect() {
   if (current) select.value = current;
 }
 
-// ── 입력 폼 ────────────────────────────────
-
-function expandForm() {
-  document.getElementById('inputExpand').style.display = 'flex';
-}
-
-function collapseForm() {
-  document.getElementById('inputExpand').style.display = 'none';
-  document.getElementById('todoTitle').value = '';
-  document.getElementById('todoDesc').value = '';
-  document.getElementById('todoGroup').value = '';
-}
+// ── 할 일 관리 ──────────────────────────────
 
 function addTodo() {
   const title = document.getElementById('todoTitle').value.trim();
@@ -132,12 +125,10 @@ function addTodo() {
   const groupId = groupVal ? parseInt(groupVal) : null;
 
   todos.push({ id: Date.now(), title, description: desc, groupId, done: false, completedAt: null });
-  collapseForm();
-  renderGroups();
+  closeAddModal();
+  renderGroupChips();
   render();
 }
-
-// ── 할 일 관리 ──────────────────────────────
 
 function formatDate(date) {
   const yyyy = date.getFullYear();
@@ -153,7 +144,7 @@ function toggleTodo(id) {
   if (!todo) return;
   todo.done = !todo.done;
   todo.completedAt = todo.done ? formatDate(new Date()) : null;
-  renderGroups();
+  renderGroupChips();
   render();
 }
 
@@ -173,13 +164,13 @@ function toggleSelectAll(checkbox) {
 function deleteSelected() {
   todos = todos.filter(t => !selectedIds.has(t.id));
   selectedIds.clear();
-  renderGroups();
+  renderGroupChips();
   render();
 }
 
 function setStatusFilter(filter, btn) {
   currentStatusFilter = filter;
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
@@ -193,78 +184,65 @@ function escapeHtml(str) {
 function getVisibleTodos() {
   return todos.filter(t => {
     if (currentGroupFilter !== null && t.groupId !== currentGroupFilter) return false;
+    if (currentStatusFilter === 'active' && t.done) return false;
+    if (currentStatusFilter === 'done' && !t.done) return false;
     return true;
   });
 }
 
-function isStatusMatch(todo) {
-  if (currentStatusFilter === 'active') return !todo.done;
-  if (currentStatusFilter === 'done') return todo.done;
-  return true;
-}
-
 function render() {
   const list = document.getElementById('todoList');
-  const summary = document.getElementById('summary');
-  const contentTitle = document.getElementById('contentTitle');
-  const deleteBtn = document.getElementById('deleteSelectedBtn');
-  const selectedCountEl = document.getElementById('selectedCount');
-  const selectAllCheckbox = document.getElementById('selectAll');
+  const selectBar = document.getElementById('selectBar');
+  const selectAll = document.getElementById('selectAll');
 
   const total = todos.length;
   const doneCount = todos.filter(t => t.done).length;
   const activeCount = total - doneCount;
 
-  // 헤더 뱃지
-  document.getElementById('badge-all').textContent = total;
-  document.getElementById('badge-active').textContent = activeCount;
-  document.getElementById('badge-done').textContent = doneCount;
+  // 탭 배지 업데이트
+  const updateBadge = (id, count) => {
+    const el = document.getElementById(id);
+    el.textContent = count || '';
+    el.classList.toggle('visible', count > 0);
+  };
+  updateBadge('badge-all', total);
+  updateBadge('badge-active', activeCount);
+  updateBadge('badge-done', doneCount);
 
-  // 목록 타이틀
-  if (currentGroupFilter !== null) {
-    const group = groups.find(g => g.id === currentGroupFilter);
-    contentTitle.textContent = group
-      ? `${group.name} · ${STATUS_LABELS[currentStatusFilter]}`
-      : STATUS_LABELS[currentStatusFilter];
-  } else {
-    contentTitle.textContent = STATUS_LABELS[currentStatusFilter];
-  }
-
-  // 요약 (현재 그룹 필터 기준)
-  const visibleTodos = getVisibleTodos();
-  const visibleDone = visibleTodos.filter(t => t.done).length;
-  const visibleActive = visibleTodos.length - visibleDone;
-  summary.textContent = visibleTodos.length > 0
-    ? `전체 ${visibleTodos.length}개 · 진행 중 ${visibleActive}개 · 완료 ${visibleDone}개`
-    : '';
-
-  // 선택 삭제 버튼
+  // 선택 삭제 바
   const selCount = selectedIds.size;
-  deleteBtn.style.display = selCount > 0 ? 'inline-block' : 'none';
-  if (selCount > 0) selectedCountEl.textContent = `(${selCount}개)`;
+  selectBar.style.display = selCount > 0 ? 'flex' : 'none';
+  if (selCount > 0) document.getElementById('selectedCount').textContent = `(${selCount}개)`;
 
-  // 전체 선택 체크박스
-  const visCount = visibleTodos.length;
+  // 전체 선택 체크박스 상태
+  const visibleTodos = getVisibleTodos();
   const selVisCount = visibleTodos.filter(t => selectedIds.has(t.id)).length;
-  selectAllCheckbox.checked = visCount > 0 && selVisCount === visCount;
-  selectAllCheckbox.indeterminate = selVisCount > 0 && selVisCount < visCount;
+  selectAll.checked = visibleTodos.length > 0 && selVisCount === visibleTodos.length;
+  selectAll.indeterminate = selVisCount > 0 && selVisCount < visibleTodos.length;
 
-  // 목록 렌더링
+  // 빈 상태
   if (visibleTodos.length === 0) {
-    list.innerHTML = '<div class="empty-msg">할 일을 추가해보세요!</div>';
+    list.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">📝</span>
+        <p class="empty-msg">할 일이 없습니다.</p>
+        <p class="empty-hint">＋ 버튼을 눌러 추가해보세요</p>
+      </div>
+    `;
     return;
   }
 
+  // 목록 렌더링
   list.innerHTML = visibleTodos.map(t => {
-    const dimmed = !isStatusMatch(t) ? 'dimmed' : '';
     const doneClass = t.done ? 'done' : '';
     const selectedClass = selectedIds.has(t.id) ? 'selected' : '';
-    const statusLabel = t.done ? '완료' : '진행 중';
 
     const group = groups.find(g => g.id === t.groupId);
     const groupTag = group
       ? `<span class="group-tag" style="background:${group.color.bg};color:${group.color.text}">${escapeHtml(group.name)}</span>`
       : '';
+
+    const doneBadge = t.done ? `<span class="done-badge">완료</span>` : '';
 
     const descHtml = t.description
       ? `<span class="todo-desc">${escapeHtml(t.description)}</span>`
@@ -275,7 +253,7 @@ function render() {
       : '';
 
     return `
-      <div class="todo-item ${doneClass} ${dimmed} ${selectedClass}">
+      <div class="todo-item ${doneClass} ${selectedClass}">
         <input class="select-checkbox" type="checkbox" ${selectedIds.has(t.id) ? 'checked' : ''}
           onchange="toggleSelect(${t.id}, this.checked)" />
         <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${t.id})" />
@@ -286,7 +264,7 @@ function render() {
         </div>
         <div class="todo-tags">
           ${groupTag}
-          <span class="status-tag">${statusLabel}</span>
+          ${doneBadge}
         </div>
       </div>
     `;
@@ -296,15 +274,16 @@ function render() {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('todoTitle').addEventListener('keydown', e => {
     if (e.key === 'Enter') addTodo();
-    if (e.key === 'Escape') collapseForm();
+    if (e.key === 'Escape') closeAddModal();
   });
   document.getElementById('todoDesc').addEventListener('keydown', e => {
-    if (e.key === 'Escape') collapseForm();
+    if (e.key === 'Escape') closeAddModal();
   });
   document.getElementById('newGroupName').addEventListener('keydown', e => {
     if (e.key === 'Enter') addGroup();
     if (e.key === 'Escape') toggleGroupInput();
   });
-  renderGroups();
+
+  renderGroupChips();
   render();
 });
