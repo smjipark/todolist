@@ -7,108 +7,95 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div class="app-container">
 
-  <!-- 상단 헤더 -->
+  <!-- 헤더 -->
   <header class="top-header">
-    <div class="header-inner">
-      <div class="header-title">
+    <div class="header-content">
+      <div class="header-left">
         <span class="logo-icon">✅</span>
         <div>
           <div class="title-row">
             <h1>TODO List</h1>
-            <span class="version-badge">v1.1.0</span>
+            <span class="version-badge">v1.2.0</span>
           </div>
           <p class="subtitle">오늘 할일을 정리해보세요.</p>
         </div>
       </div>
-
-      <nav class="header-nav">
-        <button class="nav-item active" onclick="setStatusFilter('all', this)">
-          <span class="nav-icon">📋</span>
-          <span>전체</span>
-          <span class="nav-badge" id="badge-all">0</span>
-        </button>
-        <button class="nav-item" onclick="setStatusFilter('active', this)">
-          <span class="nav-icon">🔄</span>
-          <span>진행 중</span>
-          <span class="nav-badge" id="badge-active">0</span>
-        </button>
-        <button class="nav-item" onclick="setStatusFilter('done', this)">
-          <span class="nav-icon">✔️</span>
-          <span>완료</span>
-          <span class="nav-badge" id="badge-done">0</span>
-        </button>
-      </nav>
     </div>
   </header>
 
-  <!-- 메인 레이아웃 (그룹 사이드바 + 콘텐츠) -->
-  <div class="main-layout">
-
-    <!-- 그룹 사이드바 -->
-    <aside class="group-sidebar">
-      <div class="group-sidebar-header">
-        <span class="group-sidebar-title">그룹</span>
-        <button class="group-add-btn" onclick="toggleGroupInput()" title="그룹 추가">+</button>
-      </div>
-
-      <div class="group-input-area" id="groupInputArea" style="display:none;">
-        <input type="text" id="newGroupName" placeholder="그룹 이름..." />
-        <div class="group-input-actions">
-          <button class="group-confirm-btn" onclick="addGroup()">저장</button>
-          <button class="group-cancel-btn" onclick="toggleGroupInput()">취소</button>
-        </div>
-      </div>
-
-      <div class="group-list" id="groupList"></div>
-    </aside>
-
-    <!-- 콘텐츠 -->
-    <main class="content">
-      <div class="content-inner">
-
-        <!-- 입력 카드 (인라인 확장) -->
-        <div class="input-card">
-          <div class="input-row">
-            <input type="text" id="todoTitle" placeholder="할 일을 입력하세요..."
-              onfocus="expandForm()" />
-            <button class="add-btn" onclick="addTodo()">추가</button>
-          </div>
-          <div class="input-expand" id="inputExpand" style="display:none;">
-            <textarea id="todoDesc" placeholder="설명을 입력하세요. (선택)" rows="2"></textarea>
-            <div class="input-bottom-row">
-              <select id="todoGroup">
-                <option value="">📁 그룹 없음</option>
-              </select>
-              <button class="cancel-btn" onclick="collapseForm()">취소</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 할 일 목록 -->
-        <div class="list-section">
-          <div class="list-section-header">
-            <div class="list-section-left">
-              <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="전체 선택" />
-              <span class="list-section-title" id="contentTitle">전체 할 일</span>
-            </div>
-            <div class="list-section-right">
-              <span class="summary" id="summary"></span>
-              <button class="delete-selected-btn" id="deleteSelectedBtn" onclick="deleteSelected()" style="display:none;">
-                선택 삭제 <span id="selectedCount"></span>
-              </button>
-            </div>
-          </div>
-          <div class="todo-list" id="todoList"></div>
-        </div>
-
-      </div>
-    </main>
-
+  <!-- 그룹 칩 스크롤 -->
+  <div class="chips-area">
+    <div class="chips-scroll" id="groupChips"></div>
   </div>
 
-  <script src="script.js"></script>
-</div><!-- /.app-container -->
+  <!-- 그룹 이름 입력 바 -->
+  <div class="group-input-bar" id="groupInputArea" style="display:none;">
+    <input type="text" id="newGroupName" placeholder="그룹 이름을 입력하세요..." />
+    <button class="input-bar-btn confirm" onclick="addGroup()">저장</button>
+    <button class="input-bar-btn cancel" onclick="toggleGroupInput()">✕</button>
+  </div>
+
+  <!-- 선택 삭제 바 -->
+  <div class="select-bar" id="selectBar" style="display:none;">
+    <label class="select-all-label">
+      <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" />
+      <span>전체 선택</span>
+    </label>
+    <button class="delete-sel-btn" onclick="deleteSelected()">
+      삭제 <span id="selectedCount"></span>
+    </button>
+  </div>
+
+  <!-- 할 일 목록 -->
+  <div class="list-area">
+    <div class="todo-list" id="todoList"></div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="openAddModal()">＋</button>
+
+  <!-- 하단 탭 바 -->
+  <nav class="bottom-tab">
+    <button class="tab-item active" onclick="setStatusFilter('all', this)">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">전체</span>
+      <span class="tab-badge" id="badge-all"></span>
+    </button>
+    <button class="tab-item" onclick="setStatusFilter('active', this)">
+      <span class="tab-icon">🔄</span>
+      <span class="tab-label">진행 중</span>
+      <span class="tab-badge" id="badge-active"></span>
+    </button>
+    <button class="tab-item" onclick="setStatusFilter('done', this)">
+      <span class="tab-icon">✔️</span>
+      <span class="tab-label">완료</span>
+      <span class="tab-badge" id="badge-done"></span>
+    </button>
+  </nav>
+
+  <!-- 모달 오버레이 -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeAddModal()"></div>
+
+  <!-- 추가 모달 (바텀 시트) -->
+  <div class="add-modal" id="addModal">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">새 할 일</h2>
+    <input type="text" id="todoTitle" class="modal-input" placeholder="할 일 제목을 입력하세요" />
+    <textarea id="todoDesc" class="modal-textarea" placeholder="설명 (선택 사항)" rows="3"></textarea>
+    <select id="todoGroup" class="modal-select">
+      <option value="">📁 그룹 없음</option>
+    </select>
+    <div class="modal-actions">
+      <button class="modal-cancel-btn" onclick="closeAddModal()">취소</button>
+      <button class="modal-confirm-btn" onclick="addTodo()">추가</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
