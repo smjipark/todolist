@@ -6,8 +6,22 @@
 
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #f0f2f5;
+  background: linear-gradient(135deg, #dde1f5 0%, #ece2f8 100%);
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 32px 16px;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 980px;
+  min-height: 600px;
+  background: #f4f5f9;
+  border-radius: 20px;
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.18), 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -19,9 +33,7 @@ body {
 }
 
 .header-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px 32px;
+  padding: 24px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -111,9 +123,6 @@ body {
 .main-layout {
   display: flex;
   flex: 1;
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
 }
 
 /* ── 그룹 사이드바 ── */

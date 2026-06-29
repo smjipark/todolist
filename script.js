@@ -63,6 +63,12 @@ function setGroupFilter(id) {
   render();
 }
 
+function clearGroupFilter() {
+  currentGroupFilter = null;
+  renderGroups();
+  render();
+}
+
 function renderGroups() {
   const list = document.getElementById('groupList');
 
@@ -71,7 +77,16 @@ function renderGroups() {
     return;
   }
 
-  list.innerHTML = groups.map(g => {
+  const allActive = currentGroupFilter === null;
+  const allBtn = `
+    <button class="group-item ${allActive ? 'active' : ''}" onclick="clearGroupFilter()">
+      <span class="group-dot" style="background:#9ca3af"></span>
+      <span class="group-item-name">전체 그룹</span>
+      <span class="group-item-count">${todos.length}</span>
+    </button>
+  `;
+
+  const groupBtns = groups.map(g => {
     const count = todos.filter(t => t.groupId === g.id).length;
     const isActive = currentGroupFilter === g.id;
     return `
@@ -83,6 +98,8 @@ function renderGroups() {
       </button>
     `;
   }).join('');
+
+  list.innerHTML = allBtn + groupBtns;
 }
 
 function renderGroupSelect() {
