@@ -576,3 +576,131 @@ body {
 }
 
 .modal-confirm-btn:hover { opacity: 0.88; }
+
+/* ── 인증 화면 ── */
+.auth-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+}
+
+.auth-header {
+  padding: 48px 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-header h1 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: white;
+}
+
+.auth-header .subtitle {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+
+.auth-body {
+  flex: 1;
+  background: white;
+  border-radius: 28px 28px 0 0;
+  padding: 32px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-tabs {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 4px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.auth-tab.active {
+  background: white;
+  color: #6366f1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.94rem;
+  font-family: inherit;
+  outline: none;
+  background: #fafafa;
+  transition: border-color 0.2s;
+}
+
+.auth-input:focus { border-color: #6366f1; background: white; }
+
+.auth-message {
+  font-size: 0.82rem;
+  min-height: 20px;
+  text-align: center;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: 4px;
+}
+
+.auth-submit-btn:hover { opacity: 0.88; }
+.auth-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── 메인 화면 ── */
+.main-screen {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── 로그아웃 버튼 ── */
+.logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.logout-btn:hover { background: rgba(255, 255, 255, 0.3); }

@@ -7,6 +7,8 @@ const supabase = createClient(
 
 let todos = [];
 let groups = [];
+let currentUser = null;
+let currentAuthMode = 'login';
 let currentStatusFilter = 'all';
 let currentGroupFilter = null;
 let selectedIds = new Set();
@@ -21,6 +23,83 @@ const GROUP_COLORS = [
   { bg: '#f0fdf4', text: '#14532d' },
   { bg: '#fdf4ff', text: '#7e22ce' },
 ];
+
+// ── 인증 화면 ──────────────────────────────────
+
+function showAuthScreen() {
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('mainScreen').style.display = 'none';
+}
+
+function showMainScreen() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('mainScreen').style.display = 'flex';
+  document.getElementById('userEmail').textContent = currentUser.email;
+}
+
+function showAuthTab(mode) {
+  currentAuthMode = mode;
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('tabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('authSubmitBtn').textContent = mode === 'login' ? '로그인' : '회원가입';
+  document.getElementById('authMessage').textContent = '';
+  document.getElementById('authMessage').style.color = '#ef4444';
+}
+
+function getKoreanAuthError(message) {
+  if (message.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
+  if (message.includes('User already registered')) return '이미 등록된 이메일입니다.';
+  if (message.includes('Email not confirmed')) return '이메일 인증이 필요합니다. 메일함을 확인해주세요.';
+  if (message.includes('Password should be at least')) return '비밀번호는 6자 이상이어야 합니다.';
+  if (message.includes('Unable to validate email') || message.includes('invalid')) return '올바른 이메일 형식이 아닙니다.';
+  return message;
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const messageEl = document.getElementById('authMessage');
+  const btn = document.getElementById('authSubmitBtn');
+
+  if (!email || !password) {
+    messageEl.style.color = '#ef4444';
+    messageEl.textContent = '이메일과 비밀번호를 입력해주세요.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '처리 중...';
+  messageEl.textContent = '';
+
+  if (currentAuthMode === 'login') {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      messageEl.style.color = '#ef4444';
+      messageEl.textContent = getKoreanAuthError(error.message);
+      btn.disabled = false;
+      btn.textContent = '로그인';
+    }
+  } else {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      messageEl.style.color = '#ef4444';
+      messageEl.textContent = getKoreanAuthError(error.message);
+    } else {
+      messageEl.style.color = '#6366f1';
+      messageEl.textContent = '가입 확인 이메일을 보냈습니다. 메일함을 확인해주세요.';
+    }
+    btn.disabled = false;
+    btn.textContent = '회원가입';
+  }
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  todos = [];
+  groups = [];
+  currentGroupFilter = null;
+  selectedIds.clear();
+}
 
 // ── 데이터 로드 ────────────────────────────────
 
@@ -98,6 +177,7 @@ async function addGroup() {
     name,
     color_bg: color.bg,
     color_text: color.text,
+    user_id: currentUser.id,
   });
 
   if (error) { alert('그룹 추가 중 오류가 발생했습니다.'); return; }
@@ -177,6 +257,7 @@ async function addTodo() {
     group_id: groupId,
     done: false,
     completed_at: null,
+    user_id: currentUser.id,
   });
 
   if (error) { alert('할 일 추가 중 오류가 발생했습니다.'); return; }
@@ -332,6 +413,7 @@ function render() {
 // ── ES Module에서 inline onclick 사용을 위해 전역 등록 ──
 
 Object.assign(window, {
+  showAuthTab, handleAuth, logout,
   openAddModal, closeAddModal,
   toggleGroupInput, addGroup, deleteGroup, setGroupFilter, clearGroupFilter,
   addTodo, toggleTodo, toggleSelect, toggleSelectAll, deleteSelected, setStatusFilter,
@@ -340,6 +422,26 @@ Object.assign(window, {
 // ── 초기화 ─────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 인증 상태 변화 감지 → 화면 전환
+  supabase.auth.onAuthStateChange((event, session) => {
+    currentUser = session?.user ?? null;
+    if (currentUser) {
+      showMainScreen();
+      loadData();
+    } else {
+      showAuthScreen();
+    }
+  });
+
+  // 키보드 단축키 (인증 화면)
+  document.getElementById('authEmail').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('authPassword').focus();
+  });
+  document.getElementById('authPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleAuth();
+  });
+
+  // 키보드 단축키 (메인 화면)
   document.getElementById('todoTitle').addEventListener('keydown', e => {
     if (e.key === 'Enter') addTodo();
     if (e.key === 'Escape') closeAddModal();
@@ -351,6 +453,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') addGroup();
     if (e.key === 'Escape') toggleGroupInput();
   });
-
-  loadData();
 });

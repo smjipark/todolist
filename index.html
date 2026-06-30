@@ -3,96 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TODO List555555</title>
+  <title>TODO List</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app-container">
 
-  <!-- 헤더 -->
-  <header class="top-header">
-    <div class="header-content">
-      <div class="header-left">
-        <span class="logo-icon">✅</span>
-        <div>
-          <div class="title-row">
-            <h1>TODO List</h1>
-            <span class="version-badge">v1.2.0</span>
-          </div>
-          <p class="subtitle">오늘 할일을 정리해보세요.</p>
+  <!-- 로그인/회원가입 화면 -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-header">
+      <span class="logo-icon">✅</span>
+      <div>
+        <div class="title-row">
+          <h1>TODO List</h1>
+          <span class="version-badge">v1.3.0</span>
         </div>
+        <p class="subtitle">오늘 할일을 정리해보세요.</p>
       </div>
     </div>
-  </header>
-
-  <!-- 그룹 칩 스크롤 -->
-  <div class="chips-area">
-    <div class="chips-scroll" id="groupChips"></div>
-  </div>
-
-  <!-- 그룹 이름 입력 바 -->
-  <div class="group-input-bar" id="groupInputArea" style="display:none;">
-    <input type="text" id="newGroupName" placeholder="그룹 이름을 입력하세요..." />
-    <button class="input-bar-btn confirm" onclick="addGroup()">저장</button>
-    <button class="input-bar-btn cancel" onclick="toggleGroupInput()">✕</button>
-  </div>
-
-  <!-- 선택 삭제 바 -->
-  <div class="select-bar" id="selectBar" style="display:none;">
-    <label class="select-all-label">
-      <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" />
-      <span>전체 선택</span>
-    </label>
-    <button class="delete-sel-btn" onclick="deleteSelected()">
-      삭제 <span id="selectedCount"></span>
-    </button>
-  </div>
-
-  <!-- 할 일 목록 -->
-  <div class="list-area">
-    <div class="todo-list" id="todoList"></div>
-  </div>
-
-  <!-- FAB -->
-  <button class="fab" onclick="openAddModal()">＋</button>
-
-  <!-- 하단 탭 바 -->
-  <nav class="bottom-tab">
-    <button class="tab-item active" onclick="setStatusFilter('all', this)">
-      <span class="tab-icon">📋</span>
-      <span class="tab-label">전체</span>
-      <span class="tab-badge" id="badge-all"></span>
-    </button>
-    <button class="tab-item" onclick="setStatusFilter('active', this)">
-      <span class="tab-icon">🔄</span>
-      <span class="tab-label">진행 중</span>
-      <span class="tab-badge" id="badge-active"></span>
-    </button>
-    <button class="tab-item" onclick="setStatusFilter('done', this)">
-      <span class="tab-icon">✔️</span>
-      <span class="tab-label">완료</span>
-      <span class="tab-badge" id="badge-done"></span>
-    </button>
-  </nav>
-
-  <!-- 모달 오버레이 -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeAddModal()"></div>
-
-  <!-- 추가 모달 (바텀 시트) -->
-  <div class="add-modal" id="addModal">
-    <div class="modal-handle"></div>
-    <h2 class="modal-title">새 할 일</h2>
-    <input type="text" id="todoTitle" class="modal-input" placeholder="할 일 제목을 입력하세요" />
-    <textarea id="todoDesc" class="modal-textarea" placeholder="설명 (선택 사항)" rows="3"></textarea>
-    <select id="todoGroup" class="modal-select">
-      <option value="">📁 그룹 없음</option>
-    </select>
-    <div class="modal-actions">
-      <button class="modal-cancel-btn" onclick="closeAddModal()">취소</button>
-      <button class="modal-confirm-btn" onclick="addTodo()">추가</button>
+    <div class="auth-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="showAuthTab('login')">로그인</button>
+        <button class="auth-tab" id="tabSignup" onclick="showAuthTab('signup')">회원가입</button>
+      </div>
+      <input type="email" id="authEmail" class="auth-input" placeholder="이메일" />
+      <input type="password" id="authPassword" class="auth-input" placeholder="비밀번호 (6자 이상)" />
+      <p class="auth-message" id="authMessage"></p>
+      <button class="auth-submit-btn" id="authSubmitBtn" onclick="handleAuth()">로그인</button>
     </div>
   </div>
+
+  <!-- 메인 앱 화면 (로그인 후) -->
+  <div class="main-screen" id="mainScreen">
+
+    <!-- 헤더 -->
+    <header class="top-header">
+      <div class="header-content">
+        <div class="header-left">
+          <span class="logo-icon">✅</span>
+          <div>
+            <div class="title-row">
+              <h1>TODO List</h1>
+              <span class="version-badge">v1.3.0</span>
+            </div>
+            <p class="subtitle" id="userEmail">로딩 중...</p>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- 그룹 칩 스크롤 -->
+    <div class="chips-area">
+      <div class="chips-scroll" id="groupChips"></div>
+    </div>
+
+    <!-- 그룹 이름 입력 바 -->
+    <div class="group-input-bar" id="groupInputArea" style="display:none;">
+      <input type="text" id="newGroupName" placeholder="그룹 이름을 입력하세요..." />
+      <button class="input-bar-btn confirm" onclick="addGroup()">저장</button>
+      <button class="input-bar-btn cancel" onclick="toggleGroupInput()">✕</button>
+    </div>
+
+    <!-- 선택 삭제 바 -->
+    <div class="select-bar" id="selectBar" style="display:none;">
+      <label class="select-all-label">
+        <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" />
+        <span>전체 선택</span>
+      </label>
+      <button class="delete-sel-btn" onclick="deleteSelected()">
+        삭제 <span id="selectedCount"></span>
+      </button>
+    </div>
+
+    <!-- 할 일 목록 -->
+    <div class="list-area">
+      <div class="todo-list" id="todoList"></div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="openAddModal()">＋</button>
+
+    <!-- 하단 탭 바 -->
+    <nav class="bottom-tab">
+      <button class="tab-item active" onclick="setStatusFilter('all', this)">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">전체</span>
+        <span class="tab-badge" id="badge-all"></span>
+      </button>
+      <button class="tab-item" onclick="setStatusFilter('active', this)">
+        <span class="tab-icon">🔄</span>
+        <span class="tab-label">진행 중</span>
+        <span class="tab-badge" id="badge-active"></span>
+      </button>
+      <button class="tab-item" onclick="setStatusFilter('done', this)">
+        <span class="tab-icon">✔️</span>
+        <span class="tab-label">완료</span>
+        <span class="tab-badge" id="badge-done"></span>
+      </button>
+    </nav>
+
+    <!-- 모달 오버레이 -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeAddModal()"></div>
+
+    <!-- 추가 모달 (바텀 시트) -->
+    <div class="add-modal" id="addModal">
+      <div class="modal-handle"></div>
+      <h2 class="modal-title">새 할 일</h2>
+      <input type="text" id="todoTitle" class="modal-input" placeholder="할 일 제목을 입력하세요" />
+      <textarea id="todoDesc" class="modal-textarea" placeholder="설명 (선택 사항)" rows="3"></textarea>
+      <select id="todoGroup" class="modal-select">
+        <option value="">📁 그룹 없음</option>
+      </select>
+      <div class="modal-actions">
+        <button class="modal-cancel-btn" onclick="closeAddModal()">취소</button>
+        <button class="modal-confirm-btn" onclick="addTodo()">추가</button>
+      </div>
+    </div>
+
+  </div><!-- /main-screen -->
 
 </div>
 
