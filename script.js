@@ -1,3 +1,10 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_KEY
+);
+
 let todos = [];
 let groups = [];
 let currentStatusFilter = 'all';
@@ -14,6 +21,41 @@ const GROUP_COLORS = [
   { bg: '#f0fdf4', text: '#14532d' },
   { bg: '#fdf4ff', text: '#7e22ce' },
 ];
+
+// ── 데이터 로드 ────────────────────────────────
+
+async function loadData() {
+  const [{ data: groupData, error: groupErr }, { data: todoData, error: todoErr }] = await Promise.all([
+    supabase.from('groups').select('*').order('id'),
+    supabase.from('todos').select('*').order('created_at'),
+  ]);
+
+  if (groupErr || todoErr) {
+    console.error('groups 오류:', groupErr);
+    console.error('todos 오류:', todoErr);
+    alert(`데이터를 불러오는 중 오류가 발생했습니다.\n${(groupErr || todoErr).message}`);
+    return;
+  }
+
+  groups = (groupData || []).map(g => ({
+    id: g.id,
+    name: g.name,
+    color: { bg: g.color_bg, text: g.color_text },
+  }));
+
+  todos = (todoData || []).map(t => ({
+    id: t.id,
+    title: t.title,
+    description: t.description,
+    groupId: t.group_id,
+    done: t.done,
+    completedAt: t.completed_at,
+  }));
+
+  renderGroupChips();
+  renderGroupSelect();
+  render();
+}
 
 // ── 모달 ──────────────────────────────────────
 
@@ -44,27 +86,32 @@ function toggleGroupInput() {
   }
 }
 
-function addGroup() {
+async function addGroup() {
   const input = document.getElementById('newGroupName');
   const name = input.value.trim();
   if (!name) return;
 
   const colorIndex = groups.length % GROUP_COLORS.length;
-  groups.push({ id: Date.now(), name, color: GROUP_COLORS[colorIndex] });
+  const color = GROUP_COLORS[colorIndex];
+
+  const { error } = await supabase.from('groups').insert({
+    name,
+    color_bg: color.bg,
+    color_text: color.text,
+  });
+
+  if (error) { alert('그룹 추가 중 오류가 발생했습니다.'); return; }
+
   input.value = '';
   document.getElementById('groupInputArea').style.display = 'none';
-
-  renderGroupChips();
-  renderGroupSelect();
+  await loadData();
 }
 
-function deleteGroup(id) {
-  groups = groups.filter(g => g.id !== id);
-  todos.forEach(t => { if (t.groupId === id) t.groupId = null; });
+async function deleteGroup(id) {
+  const { error } = await supabase.from('groups').delete().eq('id', id);
+  if (error) { alert('그룹 삭제 중 오류가 발생했습니다.'); return; }
   if (currentGroupFilter === id) currentGroupFilter = null;
-  renderGroupChips();
-  renderGroupSelect();
-  render();
+  await loadData();
 }
 
 function setGroupFilter(id) {
@@ -116,7 +163,7 @@ function renderGroupSelect() {
 
 // ── 할 일 관리 ──────────────────────────────
 
-function addTodo() {
+async function addTodo() {
   const title = document.getElementById('todoTitle').value.trim();
   if (!title) return;
 
@@ -124,10 +171,18 @@ function addTodo() {
   const groupVal = document.getElementById('todoGroup').value;
   const groupId = groupVal ? parseInt(groupVal) : null;
 
-  todos.push({ id: Date.now(), title, description: desc, groupId, done: false, completedAt: null });
+  const { error } = await supabase.from('todos').insert({
+    title,
+    description: desc,
+    group_id: groupId,
+    done: false,
+    completed_at: null,
+  });
+
+  if (error) { alert('할 일 추가 중 오류가 발생했습니다.'); return; }
+
   closeAddModal();
-  renderGroupChips();
-  render();
+  await loadData();
 }
 
 function formatDate(date) {
@@ -139,13 +194,20 @@ function formatDate(date) {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
 
-function toggleTodo(id) {
+async function toggleTodo(id) {
   const todo = todos.find(t => t.id === id);
   if (!todo) return;
-  todo.done = !todo.done;
-  todo.completedAt = todo.done ? formatDate(new Date()) : null;
-  renderGroupChips();
-  render();
+  const newDone = !todo.done;
+  const completedAt = newDone ? formatDate(new Date()) : null;
+
+  const { error } = await supabase.from('todos').update({
+    done: newDone,
+    completed_at: completedAt,
+  }).eq('id', id);
+
+  if (error) { alert('업데이트 중 오류가 발생했습니다.'); return; }
+
+  await loadData();
 }
 
 function toggleSelect(id, checked) {
@@ -161,11 +223,12 @@ function toggleSelectAll(checkbox) {
   render();
 }
 
-function deleteSelected() {
-  todos = todos.filter(t => !selectedIds.has(t.id));
+async function deleteSelected() {
+  const ids = [...selectedIds];
+  const { error } = await supabase.from('todos').delete().in('id', ids);
+  if (error) { alert('삭제 중 오류가 발생했습니다.'); return; }
   selectedIds.clear();
-  renderGroupChips();
-  render();
+  await loadData();
 }
 
 function setStatusFilter(filter, btn) {
@@ -199,7 +262,6 @@ function render() {
   const doneCount = todos.filter(t => t.done).length;
   const activeCount = total - doneCount;
 
-  // 탭 배지 업데이트
   const updateBadge = (id, count) => {
     const el = document.getElementById(id);
     el.textContent = count || '';
@@ -209,18 +271,15 @@ function render() {
   updateBadge('badge-active', activeCount);
   updateBadge('badge-done', doneCount);
 
-  // 선택 삭제 바
   const selCount = selectedIds.size;
   selectBar.style.display = selCount > 0 ? 'flex' : 'none';
   if (selCount > 0) document.getElementById('selectedCount').textContent = `(${selCount}개)`;
 
-  // 전체 선택 체크박스 상태
   const visibleTodos = getVisibleTodos();
   const selVisCount = visibleTodos.filter(t => selectedIds.has(t.id)).length;
   selectAll.checked = visibleTodos.length > 0 && selVisCount === visibleTodos.length;
   selectAll.indeterminate = selVisCount > 0 && selVisCount < visibleTodos.length;
 
-  // 빈 상태
   if (visibleTodos.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
@@ -232,7 +291,6 @@ function render() {
     return;
   }
 
-  // 목록 렌더링
   list.innerHTML = visibleTodos.map(t => {
     const doneClass = t.done ? 'done' : '';
     const selectedClass = selectedIds.has(t.id) ? 'selected' : '';
@@ -271,6 +329,16 @@ function render() {
   }).join('');
 }
 
+// ── ES Module에서 inline onclick 사용을 위해 전역 등록 ──
+
+Object.assign(window, {
+  openAddModal, closeAddModal,
+  toggleGroupInput, addGroup, deleteGroup, setGroupFilter, clearGroupFilter,
+  addTodo, toggleTodo, toggleSelect, toggleSelectAll, deleteSelected, setStatusFilter,
+});
+
+// ── 초기화 ─────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('todoTitle').addEventListener('keydown', e => {
     if (e.key === 'Enter') addTodo();
@@ -284,6 +352,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape') toggleGroupInput();
   });
 
-  renderGroupChips();
-  render();
+  loadData();
 });
